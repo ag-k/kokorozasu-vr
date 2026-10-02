@@ -1,0 +1,12 @@
+{
+  "name": "godaigo-3dvr",
+  "version": "1.0.0",
+  "private": true,
+  "description": "志す方へ ― 後醍醐天皇 隠岐配流と脱出（西ノ島の伝承）WebXR 体験",
+  "scripts": {
+    "start": "node server.js 8080",
+    "lan": "node server.js 8080 --https",
+    "remote": "powershell -ExecutionPolicy Bypass -File tools/start-remote.ps1",
+    "build": "node tools/build.mjs"
+  }
+}

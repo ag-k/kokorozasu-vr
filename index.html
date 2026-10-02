@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>志す方へ ― 後醍醐天皇 隠岐脱出行</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0d1216">
+<link rel="icon" href="icons/icon-192.png">
+<!-- three.js は同梱（vendor/）。ネットにつながらない所でも動くように -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/three.module.min.js",
+    "three/addons/": "./vendor/three/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app"></div>
+
+<div id="start" class="overlay">
+  <div class="card">
+    <p class="kicker">西ノ島の伝承より</p>
+    <h1>志す方へ</h1>
+    <p class="sub">後醍醐天皇　隠岐配流と脱出の物語</p>
+
+    <div class="buttons">
+      <button id="btn-vr" class="primary" disabled>VRで体験する</button>
+      <button id="btn-pc">PCで体験する</button>
+    </div>
+    <p id="vr-status" class="status">VR対応を確認しています…</p>
+
+    <details class="opts">
+      <summary>設定・章を選ぶ</summary>
+      <label>はじめる章
+        <select id="sel-chapter"></select>
+      </label>
+      <label>画質
+        <select id="sel-quality">
+          <option value="auto">自動（Quest 2 は標準、ほかは高）</option>
+          <option value="standard">標準（Quest 2 向け・軽い）</option>
+          <option value="high">高（Quest 3 以降・PC 向け・影あり）</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" id="opt-voice"> 語りを音声で読み上げる（日本語音声のある端末のみ）</label>
+      <label class="check"><input type="checkbox" id="opt-vignette" checked> 舟・輿の移動中に視野を狭める（VR酔い対策）</label>
+      <label class="check"><input type="checkbox" id="opt-smoothmove"> VRでスティックを倒して歩く（VRに慣れた人向け。酔いやすくなります）</label>
+    </details>
+
+    <details class="opts">
+      <summary>操作方法</summary>
+      <div class="howto">
+        <h3>Meta Quest（コントローラー）</h3>
+        <ul>
+          <li>移動：行きたい地面を指すと青い輪が出ます。トリガーを引くとそこへ移動（移動できる場面のみ）</li>
+          <li>トリガー：光るものを指して選ぶ／字幕が出ているときは字幕を送る</li>
+          <li>スティック前に倒して離す：弧で行き先を選んで移動することもできます</li>
+          <li>スティック左右：向きを変える</li>
+          <li>グリップ：手に持った物を離す・差し出す</li>
+          <li>B / Y ボタン：いまの目的を表示</li>
+        </ul>
+        <p>ハンドトラッキングでは、指をつまむ動作がトリガーの代わりになります。</p>
+        <h3>PC</h3>
+        <ul>
+          <li>ドラッグ：見回す　／　クリック：選ぶ</li>
+          <li>地面をクリック：そこへ移動　／　W A S D・矢印キー：歩く（移動できる場面のみ）</li>
+          <li>スペース・Enter：字幕を送る</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="opts">
+      <summary>この体験について</summary>
+      <div class="about">
+        <p>元弘二年（1332）に隠岐へ流された後醍醐天皇が、翌年閏二月に島を脱出するまでを、<strong>西ノ島に残る伝承</strong>を軸に体験する作品です。</p>
+        <p>天皇の居所には島後の国分寺説もあり、脱出の方法や航路も『太平記』『増鏡』と地域の伝承とで一致しません。作中では、語りの字幕に<strong>出典の札</strong>を添え、どの話がどこに伝わるものかを示しています。登場人物の台詞はゲームのための創作です。</p>
+        <p>別府・小向・赤ノ江の地形は、国土地理院の標高データ（DEM10B）から作っています（海岸線の確認に OpenStreetMap を参照）。三位の局屋敷跡と千福寺御座所跡は正確な位置が分からないため、御所の麓に置いています。</p>
+        <p>月日は旧暦です。</p>
+      </div>
+    </details>
+  </div>
+</div>
+
+<div id="loading" class="overlay hidden"><p>読み込み中…</p></div>
+
+<div id="hud" class="hidden">
+  <div id="hud-objective"></div>
+  <div id="hud-hint">ドラッグで見回す・クリックで選ぶ／移動・WASDで歩く・スペースで字幕送り</div>
+</div>
+
+<div id="xr-ended" class="overlay hidden">
+  <div class="card">
+    <p>VRが中断されました。</p>
+    <div class="buttons">
+      <button id="btn-vr-resume" class="primary">VRに戻る</button>
+      <button id="btn-pc-resume">PCで続ける</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

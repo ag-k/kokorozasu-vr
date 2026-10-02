@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "godaigo-vr",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "server.js",
+        "8080",
+        "--https"
+      ],
+      "port": 8080
+    }
+  ]
+}
