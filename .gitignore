@@ -2,3 +2,6 @@ tools/.cache/
 __pycache__/
 .cert/
 dist/
+
+# Quest 用 APK の作業フォルダ（署名鍵を含むので公開しない）
+apk/
