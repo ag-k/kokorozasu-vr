@@ -21,10 +21,14 @@ self.addEventListener('activate', (e) => {
 
 // 一定時間で応答がなければ保存したものを使う（電波の弱い所で待たされないように）
 // cache: 'no-cache' … HTTP キャッシュがあってもサーバーに確かめ、更新があれば新しいものを取る
+// ページ本体（navigate）の要求には直接オプションを付けられないので、URL から作り直して取る
 function fetchWithTimeout(req, ms) {
+  const fresh = req.mode === 'navigate'
+    ? fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' })
+    : fetch(req, { cache: 'no-cache' });
   return new Promise((resolve, reject) => {
     const t = setTimeout(() => reject(new Error('timeout')), ms);
-    fetch(req, { cache: 'no-cache' }).then((r) => { clearTimeout(t); resolve(r); }, (err) => { clearTimeout(t); reject(err); });
+    fresh.then((r) => { clearTimeout(t); resolve(r); }, (err) => { clearTimeout(t); reject(err); });
   });
 }
 

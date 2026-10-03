@@ -263,7 +263,8 @@ window.game = game;
 game.fontsReady = fontsReady;
 
 const $ = (id) => document.getElementById(id);
-$('app-version').textContent = VERSION_LABEL;
+// 古い起動画面が残っていても止まらないよう、要素がなければ何もしない
+if ($('app-version')) $('app-version').textContent = VERSION_LABEL;
 const sel = $('sel-chapter');
 CHAPTERS.forEach((c, i) => {
   const o = document.createElement('option');
