@@ -63,7 +63,7 @@ export class Input {
         c.source = null; c.pointer.active = false;
         if (c.handModel) { grip.remove(c.handModel); c.handModel = null; }
       });
-      ctrl.addEventListener('selectstart', () => this.onSelect(c.pointer));
+      ctrl.addEventListener('selectstart', () => { g.audio?.init(); this.onSelect(c.pointer); });
       ctrl.addEventListener('squeezeend', () => g.interact.squeezeRelease());
     }
   }

@@ -597,7 +597,11 @@ export class UI {
         const ctx = bp.ctx;
         ctx.fillStyle = 'rgba(243,236,220,0.95)'; roundRect(ctx, 3, 3, bp.W - 6, bp.H - 6, 10); ctx.fill();
         ctx.strokeStyle = '#8c2f23'; ctx.lineWidth = 3; ctx.stroke();
-        ctx.fillStyle = '#1c1a17'; ctx.font = `700 34px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#1c1a17'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        // 長い項目は枠に収まるよう字を小さくする
+        let fs = 34;
+        ctx.font = `700 ${fs}px ${FONT}`;
+        while (ctx.measureText(it.label).width > bp.W - 40 && fs > 20) { fs -= 2; ctx.font = `700 ${fs}px ${FONT}`; }
         ctx.fillText(it.label, bp.W / 2, bp.H / 2 + 2);
         bp.commit();
         bp.mesh.position.y = (items.length - 1) * 0.075 - i * 0.15;

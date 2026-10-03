@@ -290,25 +290,69 @@ function readSettings() {
   if (!game.started) applyQuality($('sel-quality').value);
 }
 
+async function openVRSession() {
+  const session = await navigator.xr.requestSession('immersive-vr', {
+    optionalFeatures: ['local-floor', 'bounded-floor', 'hand-tracking'],
+  });
+  await game.renderer.xr.setSession(session);
+  session.addEventListener('end', () => {
+    $('xr-ended').classList.remove('hidden');
+  });
+  $('start').classList.add('hidden');
+  $('xr-ended').classList.add('hidden');
+  $('hud').classList.add('hidden');
+  game.audio.init();
+  return session;
+}
+
 async function enterVR() {
   readSettings();
   try {
-    const session = await navigator.xr.requestSession('immersive-vr', {
-      optionalFeatures: ['local-floor', 'bounded-floor', 'hand-tracking'],
-    });
-    await game.renderer.xr.setSession(session);
-    session.addEventListener('end', () => {
-      $('xr-ended').classList.remove('hidden');
-    });
-    $('start').classList.add('hidden');
-    $('xr-ended').classList.add('hidden');
-    $('hud').classList.add('hidden');
-    game.audio.init();
+    await openVRSession();
     game.start(Number(sel.value));
   } catch (e) {
     console.error(e);
     $('vr-status').textContent = 'VRを開始できませんでした：' + e.message;
   }
+}
+
+// ---- Quest にアプリとして入れたとき ----
+// アプリのアイコンから開くと、ページを読み込んだらすぐ VR に入る（Meta の方式）。
+// 2D の起動画面は VR の中では見えないので、題名と章選びを VR の中のメニューで出す。
+function isInstalledApp() {
+  if (params.get('app') === '1') return true; // 開発用
+  if (document.referrer.startsWith('android-app://')) return true;
+  return ['standalone', 'fullscreen', 'minimal-ui'].some((m) => matchMedia(`(display-mode: ${m})`).matches);
+}
+
+async function vrTitleMenu() {
+  await game.wait(0.6, 'global'); // 頭の位置が決まってからメニューを置く
+  game.env.set('dawnMist');
+  for (;;) {
+    const choice = await game.ui.menu('志す方へ', [
+      { key: 'start', label: 'はじめから' },
+      { key: 'chapters', label: '章を選ぶ' },
+    ]);
+    if (choice === 'start') return 0;
+    const ch = await game.ui.menu('章を選ぶ', [
+      ...CHAPTERS.map((c, i) => ({ key: i, label: c.name.replace(/（.*）/, '') })),
+      { key: 'back', label: 'もどる' },
+    ], { dist: 1.9, y: 0.1 });
+    if (ch !== 'back') return ch;
+  }
+}
+
+async function autoEnterVR() {
+  readSettings();
+  try {
+    await openVRSession();
+  } catch (e) {
+    console.warn('自動で VR に入れませんでした', e);
+    return false;
+  }
+  const ch = await vrTitleMenu();
+  game.start(ch);
+  return true;
 }
 
 function enterPC() {
@@ -336,10 +380,13 @@ $('btn-pc-resume').addEventListener('click', enterPC);
     const ok = await navigator.xr.isSessionSupported('immersive-vr');
     $('btn-vr').disabled = !ok;
     st.textContent = ok ? 'Meta Quest のブラウザで「VRで体験する」を押してください。' : 'VR機器が見つかりません。PCモードで体験できます。';
+    // アプリとして開いたときは、すぐ VR に入る（入れなければ起動画面のまま）
+    if (ok && isInstalledApp() && !game.started) await autoEnterVR();
   } catch (e) {
     st.textContent = 'VR対応を確認できませんでした。';
   }
 })();
 
 window.applyQuality = applyQuality; // 開発用
+window.vrTitleMenu = vrTitleMenu; // 開発用（PC で VR のタイトルメニューを確かめる）
 if (params.get('autostart') === 'pc') enterPC();
