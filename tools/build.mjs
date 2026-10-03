@@ -4,6 +4,7 @@
 // ・開発用のファイル（server.js・tools・docs など）は入れない
 import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -31,6 +32,18 @@ writeFileSync(join(ROOT, 'precache.js'), precache);
 if (existsSync(DIST)) for (const f of readdirSync(DIST)) rmSync(join(DIST, f), { recursive: true, force: true });
 else mkdirSync(DIST);
 for (const e of [...ENTRIES, 'precache.js']) cpSync(join(ROOT, e), join(DIST, e), { recursive: true });
+// タイトル画面に出す版（package.json の version と、公開したコミット・日付）
+{
+  const { version: appVersion } = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+  let sha = (process.env.GITHUB_SHA || '').slice(0, 7);
+  if (!sha) { try { sha = execSync('git rev-parse --short HEAD', { cwd: ROOT }).toString().trim(); } catch { sha = 'local'; } }
+  const date = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); // 日本時間の日付
+  const v = readFileSync(join(ROOT, 'src', 'version.js'), 'utf8')
+    .replace(/export const VERSION = '[^']*';/, `export const VERSION = '${appVersion}';`)
+    .replace(/export const BUILD = '[^']*';/, `export const BUILD = '${sha}・${date}';`);
+  writeFileSync(join(DIST, 'src', 'version.js'), v);
+}
+
 // Quest 用 APK（Bubblewrap）の持ち主確認ファイル。サイトの直下 /.well-known/assetlinks.json に置く
 if (existsSync(join(ROOT, '.well-known'))) cpSync(join(ROOT, '.well-known'), join(DIST, '.well-known'), { recursive: true });
 // GitHub Pages などで _ や . で始まるファイルを無視させない

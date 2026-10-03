@@ -1,5 +1,5 @@
 // node tools/build.mjs が作るファイル（手で編集しない）
-self.VERSION = 'a1f6df79403b';
+self.VERSION = '1c4c5fca2e99';
 self.PRECACHE = [
   "./",
   "./icons/icon-192.png",
@@ -28,6 +28,7 @@ self.PRECACHE = [
   "./src/story/chapters.js",
   "./src/story/director.js",
   "./src/story/sources.js",
+  "./src/version.js",
   "./style.css",
   "./vendor/three/LICENSE",
   "./vendor/three/three.module.min.js",

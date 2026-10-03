@@ -65,6 +65,7 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 button:not(:disabled):hover { background: var(--accent); border-color: var(--accent); color: var(--paper); }
 
 .status { font-size: 13px; color: var(--muted); min-height: 1.4em; margin: 10px 0 16px; }
+.version { margin: 14px 0 0; font-size: 11px; color: var(--muted); text-align: right; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
 
 details.opts {
   border-top: 1px solid var(--line);

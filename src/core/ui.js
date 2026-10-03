@@ -575,13 +575,23 @@ export class UI {
   }
 
   // ---- メニュー（指して選ぶボタン） ----
-  menu(title, items, { dist = 1.6, y = 0 } = {}) {
+  menu(title, items, { dist = 1.6, y = 0, footer = '' } = {}) {
     const g = this.game;
     const group = new THREE.Group();
     this.placeInFront(group, dist, y);
     const handles = [];
     return new Promise(async (resolve) => {
-      await ensureFont(title + items.map((i) => i.label).join(''));
+      await ensureFont(title + footer + items.map((i) => i.label).join(''));
+      if (footer) {
+        const fp = new Panel(0.9, 0.07, { ppm: 500, overlay: false, order: 20 });
+        const fctx = fp.ctx;
+        fctx.font = `400 24px ${FONT}`; fctx.fillStyle = 'rgba(243,236,220,0.95)'; fctx.textAlign = 'center'; fctx.textBaseline = 'middle';
+        fctx.shadowColor = 'rgba(0,0,0,0.8)'; fctx.shadowBlur = 6;
+        fctx.fillText(footer, fp.W / 2, fp.H / 2);
+        fp.commit();
+        fp.mesh.position.y = (items.length - 1) * 0.075 - (items.length - 1) * 0.15 - 0.13;
+        group.add(fp.mesh);
+      }
       if (title) {
         const tp = new Panel(1.2, 0.16, { ppm: 500, overlay: false, order: 20 });
         const ctx = tp.ctx;

@@ -9,6 +9,7 @@ import { sharedUniforms, disposeTree } from './core/builder.js';
 import { easeInOut } from './core/util.js';
 import { Director } from './story/director.js';
 import { CHAPTERS } from './story/chapters.js';
+import { VERSION_LABEL } from './version.js';
 import { QUALITY, setPaths } from './core/terrain.js';
 
 const params = new URLSearchParams(location.search);
@@ -262,6 +263,7 @@ window.game = game;
 game.fontsReady = fontsReady;
 
 const $ = (id) => document.getElementById(id);
+$('app-version').textContent = VERSION_LABEL;
 const sel = $('sel-chapter');
 CHAPTERS.forEach((c, i) => {
   const o = document.createElement('option');
@@ -341,7 +343,7 @@ async function vrTitleMenu() {
     const choice = await game.ui.menu('志す方へ', [
       { key: 'start', label: 'はじめから' },
       { key: 'chapters', label: '章を選ぶ' },
-    ]);
+    ], { footer: VERSION_LABEL });
     if (choice === 'start') return 0;
     const ch = await game.ui.menu('章を選ぶ', [
       ...CHAPTERS.map((c, i) => ({ key: i, label: c.name.replace(/（.*）/, '') })),
