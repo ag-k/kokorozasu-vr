@@ -328,6 +328,8 @@ function isInstalledApp() {
 async function vrTitleMenu() {
   await game.wait(0.6, 'global'); // 頭の位置が決まってからメニューを置く
   game.env.set('dawnMist');
+  // 起動直後は暗転しているので、明るくしてからメニューを出す
+  game.ui.fadeIn(1.2);
   for (;;) {
     const choice = await game.ui.menu('志す方へ', [
       { key: 'start', label: 'はじめから' },
