@@ -246,7 +246,8 @@ const fontsReady = preloadGlyphs();
 
 // オフラインでも遊べるよう、必要なファイルを端末に保存する（https・localhost など安全な接続のときだけ）
 if ('serviceWorker' in navigator && window.isSecureContext) {
-  navigator.serviceWorker.register('sw.js').catch((e) => console.warn('service worker', e));
+  // updateViaCache: 'none' … サービスワーカーと一覧（precache.js）の更新確認で HTTP キャッシュを使わない
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch((e) => console.warn('service worker', e));
 }
 
 // ---- 起動画面 ----

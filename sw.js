@@ -8,7 +8,8 @@ const APP_CACHE = 'kokorozasu-app-' + self.VERSION;
 const FONT_CACHE = 'kokorozasu-fonts-v1';
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(APP_CACHE).then((c) => c.addAll(self.PRECACHE)).then(() => self.skipWaiting()));
+  // ブラウザの HTTP キャッシュ（GitHub Pages は最大 10 分）を通さず、必ず最新を取って保存する
+  e.waitUntil(caches.open(APP_CACHE).then((c) => c.addAll(self.PRECACHE.map((u) => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {
@@ -19,10 +20,11 @@ self.addEventListener('activate', (e) => {
 });
 
 // 一定時間で応答がなければ保存したものを使う（電波の弱い所で待たされないように）
+// cache: 'no-cache' … HTTP キャッシュがあってもサーバーに確かめ、更新があれば新しいものを取る
 function fetchWithTimeout(req, ms) {
   return new Promise((resolve, reject) => {
     const t = setTimeout(() => reject(new Error('timeout')), ms);
-    fetch(req).then((r) => { clearTimeout(t); resolve(r); }, (err) => { clearTimeout(t); reject(err); });
+    fetch(req, { cache: 'no-cache' }).then((r) => { clearTimeout(t); resolve(r); }, (err) => { clearTimeout(t); reject(err); });
   });
 }
 
