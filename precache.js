@@ -1,5 +1,5 @@
 // node tools/build.mjs が作るファイル（手で編集しない）
-self.VERSION = '4180cf29da3f';
+self.VERSION = 'a1f6df79403b';
 self.PRECACHE = [
   "./",
   "./icons/icon-192.png",

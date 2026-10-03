@@ -214,6 +214,12 @@ class Game {
       this.clearChapter();
       try {
         const next = await CHAPTERS[i].run(this, this.director);
+        if (next === 'title') {
+          // 終章のあと：タイトルに戻る
+          this.clearChapter();
+          await this.onTitle?.();
+          return;
+        }
         if (typeof next === 'number') i = next - 1;
       } catch (e) {
         console.error('chapter error', e);
@@ -344,6 +350,19 @@ async function vrTitleMenu() {
     if (ch !== 'back') return ch;
   }
 }
+
+// タイトルに戻る：VR の中なら VR のタイトルメニュー、PC なら起動画面
+game.onTitle = async () => {
+  if (game.isXR) {
+    const ch = await vrTitleMenu();
+    game.run(ch);
+    return;
+  }
+  game.started = false;
+  game.ui.fade(0, 0);
+  $('hud').classList.add('hidden');
+  $('start').classList.remove('hidden');
+};
 
 async function autoEnterVR() {
   readSettings();

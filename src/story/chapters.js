@@ -1,6 +1,6 @@
 // 章ごとの台本。西ノ島の伝承を軸に、知夫里島の伝承・『太平記』・『増鏡』を出典の札とともに語る。
 import * as THREE from 'three';
-import { SRC, BOOK_PAGES } from './sources.js';
+import { SRC } from './sources.js';
 import { buildExileSea, buildEscapeSea, buildHoki } from '../scenes/sea.js';
 import { buildChiburi, CHIBURI } from '../scenes/chiburi.js';
 import { buildBeppu, addBeppuNight, HOPS, PAL_ROUTE, PATROL, makePalanquin } from '../scenes/beppu.js';
@@ -901,18 +901,9 @@ async function epilogue(g, d) {
   await d.narrate('島へ連れて来られた帝は、人々の助けを受けて、島を離れる帝となった。', null, { min: 5 });
   await g.wait(1.5);
 
-  for (;;) {
-    const choice = await g.ui.menu('志す方へ　おわり', [
-      { key: 'book', label: '伝承帖を読む' },
-      { key: 'betsuden', label: '別伝「赤崎の伝説」を読む' },
-      { key: 'restart', label: 'はじめから' },
-    ]);
-    if (choice === 'book') await g.ui.book(BOOK_PAGES);
-    else if (choice === 'betsuden') await g.ui.book(BOOK_PAGES.filter((p) => p.title.startsWith('別伝')), { title: '別伝' });
-    else break;
-  }
+  await g.ui.menu('志す方へ　おわり', [{ key: 'title', label: 'タイトルに戻る' }]);
   await g.ui.fadeOut(1.5);
-  return 0;
+  return 'title';
 }
 
 export const CHAPTERS = [
