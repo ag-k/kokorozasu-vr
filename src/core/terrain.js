@@ -44,6 +44,7 @@ export class Terrain {
       size: 800, seg: 160, cx: 0, cz: 0, seed: 7, base: -14,
       islands: [], bays: [], pads: [], paths: [], edgeFall: true,
       palette: {}, redRock: 0, mask: null, grassNoise: 0.012, map: null,
+      vScale: 1, // 標高データの高さの倍率（海面を基準に縮める。歩きやすさのため）
     }, cfg);
     const c = this.cfg;
     this.pal = Object.fromEntries(Object.entries({ ...PALETTE, ...c.palette }).map(([k, v]) => [k, new THREE.Color(v)]));
@@ -53,7 +54,7 @@ export class Terrain {
     this.x0 = c.cx - c.size / 2;
     this.z0 = c.cz - c.size / 2;
     // 高さ未指定の平場は元の地形の高さに合わせる
-    for (const p of c.pads) if (p.h === undefined) p.h = this.rawHeight(p.x, p.z, true) + (p.dh || 0);
+    for (const p of c.pads) if (p.h === undefined) p.h = this.rawHeight(p.x, p.z, true, 0) + (p.dh || 0);
     this.heights = new Float32Array(this.n * this.n);
     for (let j = 0; j < this.n; j++) {
       for (let i = 0; i < this.n; i++) {
@@ -63,9 +64,10 @@ export class Terrain {
     this.mesh = this.buildMesh();
   }
 
-  rawHeight(x, z, skipPads = false) {
+  // skipPads: 平場を無視。gradeUpTo: 何本目の道まで「ならし」を効かせるか（既定はすべて）
+  rawHeight(x, z, skipPads = false, gradeUpTo = Infinity) {
     const c = this.cfg, N = this.noise;
-    let h = c.map ? sampleMap(c.map, x, z) : c.base;
+    let h = c.map ? sampleMap(c.map, x, z) * c.vScale : c.base;
     for (const is of c.islands) {
       const dx = x - is.x, dz = z - is.z;
       const r = is.rot || 0, cs = Math.cos(r), sn = Math.sin(r);
@@ -87,6 +89,31 @@ export class Terrain {
       const d = Math.sqrt((x - p.x) ** 2 + (z - p.z) ** 2);
       const w = 1 - smoothstep(p.r, p.r + (p.blend ?? p.r * 0.8), d);
       if (w > 0) h = lerp(h, p.h, w);
+    }
+    // 坂道のならし（grade）：道の始めから終わりまで一定の傾きで下る切り通しの道にする
+    for (let k = 0; k < c.paths.length && k < gradeUpTo; k++) {
+      const p = c.paths[k];
+      if (!p.grade) continue;
+      if (!p._grade) {
+        // 両端の高さ（それより前の道のならしを含めて測る。道どうしのつなぎ目に段差を作らない）
+        const lens = [0];
+        for (let s = 1; s < p.pts.length; s++) lens.push(lens[s - 1] + Math.hypot(p.pts[s][0] - p.pts[s - 1][0], p.pts[s][1] - p.pts[s - 1][1]));
+        const [ax, az] = p.pts[0], [bx, bz] = p.pts[p.pts.length - 1];
+        p._grade = { lens, h0: this.rawHeight(ax, az, false, k), h1: this.rawHeight(bx, bz, false, k) };
+      }
+      const G = p._grade;
+      let best = Infinity, bestS = 0;
+      for (let s = 0; s < p.pts.length - 1; s++) {
+        const [ax, az] = p.pts[s], [bx, bz] = p.pts[s + 1];
+        const dx = bx - ax, dz = bz - az, L2 = dx * dx + dz * dz || 1;
+        const t = clamp(((x - ax) * dx + (z - az) * dz) / L2, 0, 1);
+        const d = Math.hypot(x - (ax + dx * t), z - (az + dz * t));
+        if (d < best) { best = d; bestS = G.lens[s] + (G.lens[s + 1] - G.lens[s]) * t; }
+      }
+      // 地形の網目（標高データなら 9m 角）より細い切り通しは表せないので、ならす幅は網目に合わせて広めにとる
+      const full = Math.max(p.w * 0.5 + 0.6, p.gradeWidth ?? this.cell * 0.7);
+      const w = 1 - smoothstep(full, full + (p.blend ?? this.cell), best);
+      if (w > 0) h = lerp(h, lerp(G.h0, G.h1, bestS / G.lens[G.lens.length - 1]), w);
     }
     for (const p of c.paths) {
       if (!p.flatten) continue;

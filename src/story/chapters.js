@@ -115,7 +115,8 @@ async function chiburi(g, d) {
   g.ui.fadeIn(2);
   g.ui.setVignette(0.5);
   g.addUpdater(() => { S.boat.userData.oar.rotation.y = Math.sin(g.time * 1.6) * 0.4; });
-  const arrive = followPath(g, S.boat, [P(0, 46), P(0, S.shoreZ + 2.6)], 1.9, { turn: false });
+  S.boat.position.z = 38;
+  const arrive = followPath(g, S.boat, [P(0, 38), P(0, S.shoreZ + 2.6)], 2.3, { turn: false });
   await d.narrate('隠岐の島前、知夫里島。帝の一行が上陸したと伝わるのが、この仁夫里浜である。', SRC.chibu);
   await arrive;
   g.ui.setVignette(0);
@@ -509,7 +510,7 @@ async function escapeNight(g, d) {
   await d.narrate('天皇であっても、御所を離れれば自分の足で進み、人に支えられ、舟が来るのを待たなければならない。');
 
   // 入り江の奥から迎えの舟が近づく
-  const boatArrive = followPath(g, Kb.boat, [P(-95, 115), P(-50, 55), P(K.boatAt.x, K.boatAt.z)], 2.5, { yawOffset: Math.PI / 2 });
+  const boatArrive = followPath(g, Kb.boat, [P(-75, 88), P(-50, 55), P(K.boatAt.x, K.boatAt.z)], 3.2, { yawOffset: Math.PI / 2 });
   const bl = V3();
   g.addUpdater(() => { Kb.boat.userData.oar.rotation.y = Math.sin(g.time * 1.6) * 0.4; Kb.boatLamp.getWorldPosition(bl); });
 
@@ -608,7 +609,7 @@ async function akanoe(g, d) {
   startLeg(LEG_A);
   await g.ui.fadeIn(2);
   g.ui.setVignette(0.5);
-  let leg = followPath(g, S.boat, LEG_A.map((p) => P(p.x, p.z)), 3.0, { yawOffset: Math.PI / 2 });
+  let leg = followPath(g, S.boat, LEG_A.map((p) => P(p.x, p.z)), 3.4, { yawOffset: Math.PI / 2 });
   await d.narrate('帝は小向から小舟に乗り、入り江を赤崎の岬へと急いだ。', SRC.nishiMap);
   d.objective('笏を手に、赤崎の岬を目指す');
   if (isXR(g)) d.hint('右手に笏を持っています', 5);
@@ -620,7 +621,7 @@ async function akanoe(g, d) {
   startLeg(LEG_B);
   await g.wait(0.3);
   await g.ui.fadeIn(1.2);
-  leg = followPath(g, S.boat, LEG_B.map((p) => P(p.x, p.z)), 2.8, { yawOffset: Math.PI / 2 });
+  leg = followPath(g, S.boat, LEG_B.map((p) => P(p.x, p.z)), 3.2, { yawOffset: Math.PI / 2 });
   await d.narrate('湾を渡りきると、西の岸に小さな入り江が口を開けていた。');
   await g.waitUntil(() => S.boat.position.x < DROP_X);
 
@@ -650,7 +651,7 @@ async function akanoe(g, d) {
   startLeg(LEG_C);
   await g.wait(0.3);
   await g.ui.fadeIn(1.2);
-  leg = followPath(g, S.boat, LEG_C.map((p) => P(p.x, p.z)), 2.8, { yawOffset: Math.PI / 2 });
+  leg = followPath(g, S.boat, LEG_C.map((p) => P(p.x, p.z)), 3.6, { yawOffset: Math.PI / 2 });
   d.objective('岬の先、赤崎を見る');
   await d.waitGaze(S.capeLook, { deg: 25, secs: 1.0 });
   d.objective('');
@@ -758,20 +759,23 @@ async function seaChase(g, d) {
   });
   d.objective('息をひそめる（なるべく動かずに）');
   d.hint('見つからないよう、なるべく動かずに…', 5);
-  // 動いているかの判定
-  const prevPos = V3().copy(g.headPos), prevDir = V3().copy(g.headDir);
+  // 動いているかの判定。船そのものが進んでいるので、頭の動きは船に対して測る
+  const headLocal = () => ship.worldToLocal(g.headPos.clone());
+  const dirLocal = () => g.headDir.clone().transformDirection(ship.matrixWorld.clone().invert());
+  const prevPos = headLocal(), prevDir = dirLocal();
   let motion = 0;
   const moveUpd = g.addUpdater((dt) => {
     let m = 0;
     if (g.isXR) {
-      const sp = g.headPos.distanceTo(prevPos) / Math.max(dt, 1e-3);
-      const rot = Math.acos(clamp(g.headDir.dot(prevDir), -1, 1)) / Math.max(dt, 1e-3);
+      const hp = headLocal(), hd = dirLocal();
+      const sp = hp.distanceTo(prevPos) / Math.max(dt, 1e-3);
+      const rot = Math.acos(clamp(hd.dot(prevDir), -1, 1)) / Math.max(dt, 1e-3);
       m = (sp > 0.35 ? 1 : 0) + (rot > 1.0 ? 1 : 0);
+      prevPos.copy(hp); prevDir.copy(hd);
     } else {
       m = g.time - g.input.lastMove < 0.25 ? 1 : 0;
     }
     motion = Math.max(0, motion * Math.exp(-dt * 1.5) + m * dt * 2);
-    prevPos.copy(g.headPos); prevDir.copy(g.headDir);
   });
   const lines = [
     ['追手', 'その船、止まれ！　怪しい者を乗せてはおらぬか。'],
@@ -788,8 +792,9 @@ async function seaChase(g, d) {
       await d.say('追手', '待て。今、下で何か動かなんだか。', { fig: P0.torch });
       await d.say('船頭', '鼠でございましょう。干し魚をかじりに出てまいります。', { fig: S.sendo });
       d.hint('動かずに……', 4);
-      let still = 0;
-      await g.waitUntil((dt) => { still = motion < 0.3 ? still + dt : 0; return still > 2.5; });
+      // 2.5 秒じっとしていれば先へ。うまく判定できなくても 12 秒で先へ進む
+      let still = 0, waited = 0;
+      await g.waitUntil((dt) => { waited += dt; still = motion < 0.3 ? still + dt : 0; return still > 2.5 || waited > 12; });
     }
   }
   await d.say('船頭', 'そういえば、それらしいお方を乗せた小舟が、先ほど向こうへ漕いでゆきましたぞ。', { fig: S.sendo });

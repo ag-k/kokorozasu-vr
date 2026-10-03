@@ -8,10 +8,11 @@ import { scatterTrees, scatterShoreRocks } from '../core/terrain.js';
 import { MAPS } from './mapdata.js';
 
 // 舟の道筋（区間ごと）
-export const LEG_A = [{ x: -15, z: 12 }, { x: -50, z: 100 }, { x: -80, z: 190 }];
-export const LEG_B = [{ x: -2530, z: 1805 }, { x: -2650, z: 1830 }, { x: -2860, z: 1862 }];
+// 舟の場面が長くなりすぎないよう、各区間は物語の起きる所の少し手前から始める（道筋は同じ水路の上）
+export const LEG_A = [{ x: -27.5, z: 27.4 }, { x: -50, z: 100 }];
+export const LEG_B = [{ x: -2595, z: 1818 }, { x: -2650, z: 1830 }, { x: -2760, z: 1846 }];
 // 最後は沖の船の横（左舷側 7m ほど）へ漕ぎ寄せる
-export const LEG_C = [{ x: -2640, z: 2390 }, { x: -2575, z: 2455 }, { x: -2480, z: 2555 }, { x: -2462, z: 2592 }, { x: -2443, z: 2611 }];
+export const LEG_C = [{ x: -2520, z: 2513 }, { x: -2480, z: 2555 }, { x: -2462, z: 2592 }, { x: -2443, z: 2611 }];
 export const DROP_X = -2650; // 赤ノ江（笏の江）の手前で笏が落ちる
 export const AKANOE = { x: -3126, z: 1773 };
 export const AKASAKI = { x: -2577, z: 2556 };

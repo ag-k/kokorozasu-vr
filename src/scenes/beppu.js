@@ -15,8 +15,12 @@ import { Builder, MAT } from '../core/builder.js';
 import { distToPath, yawTo } from '../core/util.js';
 import { MAPS } from './mapdata.js';
 
+// 標高の倍率。実際の天皇山（約 40m）は斜面が急すぎて歩きにくいので、海面を基準に 0.6 倍に縮める
+// （高さをそろって縮めるので、御所から湾・見付島への見通しは変わらない）
+export const V_SCALE = 0.6;
+
 export const B = {
-  gosho: { x: -2, z: 9, h: 40 },
+  gosho: { x: -2, z: 9, h: 40 * V_SCALE },
   tsubone: { x: -75, z: 2 },
   senpuku: { x: -55, z: -47 },
   hangan: { x: -216, z: -57 },
@@ -35,11 +39,12 @@ export const HOPS = [[-30, -45], [-52, -35], [-72, -15], [-95, 1], [-120, 12], [
 export const PATROL = { a: [-138, -30], b: [-170, 36] };
 
 // 御所の門から、千福寺・三位の局の屋敷・判官館・浜へ続く道
+// grade: 一定の傾きでならした坂道（急な斜面を切り通して歩きやすくする）
 const PATHS = [
-  { pts: [toWorld(0, FENCE_BACK + 0.5), [-2, -6], [-5, -15], [-10, -27], [-20, -41], [-38, -47], [-50, -47]], w: 2.6 },
-  { pts: [[-20, -44], [-45, -30], [-62, -12], [-70, -2]], w: 2.2 },
+  { pts: [toWorld(0, FENCE_BACK + 0.5), [-2, -6], [-5, -15], [-10, -27], [-20, -41], [-38, -47], [-50, -47]], w: 2.6, grade: true },
+  { pts: [[-20, -44], [-45, -30], [-62, -12], [-70, -2]], w: 2.2, grade: true },
   // 門から西へ下り、三位の局の屋敷の前へ
-  { pts: [toWorld(0, FENCE_BACK + 0.5), [-8, -3], [-20, -6], [-36, -5], [-52, -1], [-64, 1.5], [-70, 2]], w: 2.4 },
+  { pts: [toWorld(0, FENCE_BACK + 0.5), [-8, -3], [-20, -6], [-36, -5], [-52, -1], [-64, 1.5], [-70, 2]], w: 2.4, grade: true },
   { pts: [[-50, -47], [-72, -15], [-95, 1], [-120, 12], [-145, 20], [-170, 28], [-198, 36], [-240, 46]], w: 2 },
   { pts: [[-120, 12], [-150, -10], [-190, -40], [-205, -52]], w: 2 },
 ];
@@ -50,8 +55,9 @@ export function buildBeppu(game, { night = false } = {}) {
   game.env.setWaves(0.12);
 
   const gy = B.gosho.h;
+  st.mapVScale = V_SCALE;
   const t = st.makeTerrain({
-    map: MAPS.beppu, seed: 31, base: -6,
+    map: MAPS.beppu, seed: 31, base: -6, vScale: V_SCALE,
     pads: [
       { x: G.x, z: G.z - 0.5, r: 10, h: gy, blend: 5 },
       { x: B.tsubone.x, z: B.tsubone.z, r: 6, dh: 0.3, blend: 5 },

@@ -70,7 +70,7 @@ export function buildKomukai(game) {
   for (let i = 0; i < 3; i++) st.put(makeRock(0.4, 300 + i, '#6f6a60'), K.landing.x + 6 + i * 2.2, K.landing.z - 5 - i, i);
 
   // 迎えの小舟
-  const boat = st.add(makeSmallBoat(), -95, 0.05, 115, Math.PI * 0.75);
+  const boat = st.add(makeSmallBoat(), -75, 0.05, 88, Math.PI * 0.75);
   const rower = st.fig({ robe: '#4a4438', hat: 'kasa' }, -2.1, boat.userData.floorY, 0, -Math.PI / 2, boat);
   const boatLamp = makeLantern();
   st.add(boatLamp, 1.9, 0.2, 0.3, 0, boat);

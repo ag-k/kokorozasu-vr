@@ -63,7 +63,7 @@ export class Stage {
   // 標高データの遠景。boxes の内側は手前の地形に任せて沈める
   mapBackdrop(map, ...boxes) {
     const inside = (x, z) => boxes.some((b) => x > b.x0 && x < b.x1 && z > b.z0 && z < b.z1);
-    const t = new Terrain({ map, base: -25, grassNoise: 0.004, seed: 77, mask: boxes.length ? (x, z) => (inside(x, z) ? 0 : 1) : null });
+    const t = new Terrain({ map, base: -25, grassNoise: 0.004, seed: 77, vScale: this.mapVScale || 1, mask: boxes.length ? (x, z) => (inside(x, z) ? 0 : 1) : null });
     this.root.add(t.mesh);
     return t;
   }

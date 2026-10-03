@@ -25,7 +25,8 @@ export function buildChiburi(game) {
     size: 700, seg: 140, cx: 30, cz: -80, seed: 12, base: -12, forest: 0.3,
     islands: [
       { x: 40, z: -150, rx: 300, rz: 210, h: 16, pow: 1.1, rough: 4, wobble: 0.25 },
-      { x: 27, z: -68, rx: 95, rz: 85, h: 34, pow: 0.9, rough: 2, wobble: 0.12, off: 1 },
+      // 赤ハゲ山：歩いて登れるよう、低く（約 13m）なだらかに
+      { x: 27, z: -68, rx: 135, rz: 120, h: 13, pow: 1.2, rough: 0.8, wobble: 0.08, off: 1 },
       { x: -60, z: -40, rx: 120, rz: 90, h: 18, rough: 4, off: 2 },
     ],
     bays: [{ x: -2, z: 40, rx: 40, rz: 45, depth: 3 }],
@@ -49,7 +50,7 @@ export function buildChiburi(game) {
   // 木々：赤ハゲ山の上は草地、麓に林
   st.root.add(scatterTrees(t, {
     count: 450, seed: 5, minH: 2, maxH: 26,
-    density: (x, z, h) => (h < 12 ? 0.6 : h < 20 ? 0.2 : 0.02) * (distToPath(x, z, PATH) > 6 ? 1 : 0),
+    density: (x, z, h) => (h < 6 ? 0.6 : h < 10 ? 0.2 : 0.02) * (distToPath(x, z, PATH) > 6 ? 1 : 0),
     exclude: [{ x: CHIBURI.nibu.x, z: CHIBURI.nibu.z, r: 16 }, { x: CHIBURI.furumi.x, z: CHIBURI.furumi.z, r: 14 }, { x: 0, z: 0, r: 14 }],
   }));
   st.root.add(scatterGrass(t, {
