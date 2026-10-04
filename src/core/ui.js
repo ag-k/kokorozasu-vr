@@ -692,7 +692,8 @@ export class UI {
 
   attachWrist(grip) {
     grip.add(this.wrist.mesh);
-    this.wrist.mesh.position.set(0, 0.05, 0.12);
+    // 袖（手首のまわりの円錐、半径 6.5〜14cm）の外側に出す
+    this.wrist.mesh.position.set(0, 0.15, 0.14);
     this.wrist.mesh.rotation.set(-Math.PI / 2 + 0.5, 0, 0);
   }
 
